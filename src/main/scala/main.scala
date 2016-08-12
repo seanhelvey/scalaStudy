@@ -19,36 +19,78 @@ object Main {
   case object InvalidMove extends UserError
   case object GameOver extends UserError
 
-  case class CurrentInput(row: Int, col: Int)
+  case class CurrentInput(col: Int, row: Int)
 
-  // def update(userInput: CurrentInput, state: GameState): Either[UserError, GameState] = {
+  def alternateTurn(state: GameState): GameState =
+    state.player match {
+      case Xs => state.copy(player=Os)
+      case Os => state.copy(player=Xs)
+    }
 
   def update(userInput: CurrentInput, state: GameState): Either[UserError, GameState]  = {
-    if (state.board.matrix.top.left != None) 
-      Left(InvalidMove) 
-    else 
-      Right(GameState(Board(Col[Option[PlayerChoice]](
-        Row(Some(Xs), None, None),
-        Row(None, None, None),
-        Row(None, None, None))), Xs))
+    userInput match {
+      case CurrentInput(1,1) =>
+        if (state.board.matrix.top.left != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(left=Some(state.player)), middle = state.board.matrix.middle.copy(), bottom = state.board.matrix.bottom.copy())))))
+      case CurrentInput(1,2) =>
+        if (state.board.matrix.top.middle != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(middle=Some(state.player)), middle = state.board.matrix.middle.copy(), bottom = state.board.matrix.bottom.copy())))))
+      case CurrentInput(1,3) =>
+        if (state.board.matrix.top.middle != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(right=Some(state.player)), middle = state.board.matrix.middle.copy(), bottom = state.board.matrix.bottom.copy())))))
+      case CurrentInput(2,1) =>
+        if (state.board.matrix.top.left != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(), middle = state.board.matrix.middle.copy(left=Some(state.player)), bottom = state.board.matrix.bottom.copy())))))
+      case CurrentInput(2,2) =>
+        if (state.board.matrix.top.middle != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(), middle = state.board.matrix.middle.copy(middle=Some(state.player)), bottom = state.board.matrix.bottom.copy())))))
+      case CurrentInput(2,3) =>
+        if (state.board.matrix.top.middle != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(), middle = state.board.matrix.middle.copy(right=Some(state.player)), bottom = state.board.matrix.bottom.copy())))))
+      case CurrentInput(3,1) =>
+        if (state.board.matrix.top.left != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(), middle = state.board.matrix.middle.copy(), bottom = state.board.matrix.bottom.copy(left=Some(state.player)))))))
+      case CurrentInput(3,2) =>
+        if (state.board.matrix.top.middle != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(), middle = state.board.matrix.middle.copy(), bottom = state.board.matrix.bottom.copy(middle=Some(state.player)))))))
+      case CurrentInput(3,3) =>
+        if (state.board.matrix.top.middle != None)
+          Left(InvalidMove)
+        else
+          Right(alternateTurn(state.copy(state.board.copy(state.board.matrix.copy(top = state.board.matrix.top.copy(), middle = state.board.matrix.middle.copy(), bottom = state.board.matrix.bottom.copy(right=Some(state.player)))))))
+    }
   }
 
-  def getInput: CurrentInput = 
+  def getInput: CurrentInput =
     {
-      println("getInput called")
+      val col = readLine("Col 1, 2, or 3\n").toInt
       val row = readLine("Row 1, 2, or 3\n").toInt
-      val col = readLine("Col 1, 2, or 3\n").toInt   
-      CurrentInput(row, col)
+      CurrentInput(col, row)
     }
 
   def showError(err: UserError): Unit = ???
 
-  def printBoard(state: GameState): Unit = 
+  def printBoard(state: GameState): Unit =
     println(state.board)
 
   @tailrec
   def loop(state: GameState): Unit = {
-    //println(state.board.matrix.top.left)
     val userInput = getInput
 
     update(userInput, state) match {
