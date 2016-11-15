@@ -76,7 +76,7 @@ object Application {
 
   def act(command: Command, oldState: GameState): ActResult = command match {
     case Quit => ActResult(text = List("quit"), state = None)
-    case Help => ActResult(text = List("help"), state = None)
+    case Help => ActResult(text = List("q -> quit, h -> help"), state = Some(oldState))
     case _ => ActResult(text = List("unknown"), state = None)
   }
 
