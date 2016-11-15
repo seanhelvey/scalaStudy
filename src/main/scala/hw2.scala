@@ -61,22 +61,33 @@ case class GameState(player: PlayerState, map: WorldMap)
 sealed trait Command
 case object LookAround extends Command
 case object Quit extends Command
+case object Help extends Command
 
 object Application {
-  def parse(text: String): Either[String, Command] = ???
+  def parse(text: String): Either[String, Command] =    
+    text match {
+      case "q" => Right(Quit)       
+      case "h" => Right(Help)
+      case _ => Left("command not found")
+    }
+
 
   final case class ActResult(text: List[String], state: Option[GameState])
 
   def act(command: Command, oldState: GameState): ActResult = command match {
-    case Quit => ActResult(text = Nil, state = None)
-    case _ => ???
+    case Quit => ActResult(text = List("quit"), state = None)
+    case Help => ActResult(text = List("help"), state = None)
+    case _ => ActResult(text = List("unknown"), state = None)
   }
 
-  def loop(oldState: GameState): IO[GameState] =
+  def loop(oldState: GameState): IO[GameState] =  
     for {
       line <- Console.getStrLn
 
+      _ = println("line: " + line)
+
       ActResult(text, newStOpt) =
+
         parse(line) match {
           case Left(error) =>
             ActResult("Sorry, that command was not recognized:" :: error :: Nil, Some(oldState))
@@ -88,7 +99,7 @@ object Application {
       _ <-  text.foldLeft[IO[Unit]](IO.point(())) {
               case (io, line) =>
                 for {
-                  // _ <- io
+                  _ <- io
                   _ <- Console.putStrLn(line)
                 } yield ()
             }
@@ -98,12 +109,22 @@ object Application {
                         case Some(newState) => loop(newState)
                       }
     } yield finalState
+    
 
   /**
    * A pure IO value representing the application.
    */
   def start: IO[Unit] = 
-    Console.putStrLn("hello world!")
+    {
+      val initialState = 
+        GameState(
+          PlayerState(Location(0,0), List()),
+          WorldMap(Vector(Vector(Cell(List[Item](), "Home"))))
+        )
+      Application.loop(initialState)      
+      Console.putStrLn("You are standing in a field of green")
+    }
+
 }
 
 object Main {
