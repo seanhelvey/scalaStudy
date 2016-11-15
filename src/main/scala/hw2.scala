@@ -52,6 +52,9 @@ case class WorldMap(private val value: Vector[Vector[Cell]]) {
   def cellAt(loc: Location): Option[Cell] = ???
 
   def updateAt(loc: Location, f: Cell => Cell): Option[WorldMap] = ???
+
+  def display: String =
+    value.apply(0).apply(0).toString()
 }
 
 case class PlayerState(loc: Location, inv: List[Item])
@@ -66,7 +69,8 @@ case object Help extends Command
 object Application {
   def parse(text: String): Either[String, Command] =    
     text match {
-      case "q" => Right(Quit)       
+      case "l" => Right(LookAround)
+      case "q" => Right(Quit)
       case "h" => Right(Help)
       case _ => Left("command not found")
     }
@@ -75,8 +79,9 @@ object Application {
   final case class ActResult(text: List[String], state: Option[GameState])
 
   def act(command: Command, oldState: GameState): ActResult = command match {
+    case LookAround => ActResult(text = List(oldState.map.display), state = Some(oldState))
     case Quit => ActResult(text = List("quit"), state = None)
-    case Help => ActResult(text = List("q -> quit, h -> help"), state = Some(oldState))
+    case Help => ActResult(text = List("l -> look around, q -> quit, h -> help"), state = Some(oldState))
     case _ => ActResult(text = List("unknown"), state = None)
   }
 
