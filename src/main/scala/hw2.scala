@@ -84,8 +84,6 @@ object Application {
     for {
       line <- Console.getStrLn
 
-      _ = println("line: " + line)
-
       ActResult(text, newStOpt) =
 
         parse(line) match {
@@ -121,9 +119,13 @@ object Application {
           PlayerState(Location(0,0), List()),
           WorldMap(Vector(Vector(Cell(List[Item](), "Home"))))
         )
-      Application.loop(initialState)      
-      Console.putStrLn("You are standing in a field of green")
+      for { 
+        _ <- Console.putStrLn("You are standing in a field of green") 
+        _ <- Application.loop(initialState) 
+      } yield ()
     }
+
+
 
 }
 
